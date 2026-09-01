@@ -151,12 +151,14 @@ export async function runDeterministicPaymentLane(
     throw new Error('Missing facilitator port');
 
   const facilitatorUrl = `http://127.0.0.1:${facilitator.port}`;
-  const example = await options.createExample(facilitatorUrl);
+  let example: Awaited<ReturnType<typeof options.createExample>> | undefined;
   let signerCalls = 0;
   let handlerSucceeded = false;
   try {
+    const initializedExample = await options.createExample(facilitatorUrl);
+    example = initializedExample;
     const invoke = (headers?: Record<string, string>) =>
-      example.app.fetch(
+      initializedExample.app.fetch(
         new Request('http://127.0.0.1/entrypoints/exact-report/invoke', {
           method: 'POST',
           headers: { 'content-type': 'application/json', ...headers },
@@ -211,7 +213,7 @@ export async function runDeterministicPaymentLane(
       broadcastCalls: settleCalls,
     };
   } finally {
-    await example.close();
+    await example?.close();
     facilitator.stop(true);
   }
 }

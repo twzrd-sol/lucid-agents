@@ -60,4 +60,19 @@ describe('deterministic exact payment runner', () => {
       });
     }
   );
+
+  it('stops the local facilitator when example initialization fails', async () => {
+    let facilitatorUrl = '';
+    await expect(
+      runDeterministicPaymentLane('evm', {
+        createExample: url => {
+          facilitatorUrl = url;
+          throw new Error('merchant initialization failed');
+        },
+        authorize: () => true,
+      })
+    ).rejects.toThrow('merchant initialization failed');
+
+    await expect(fetch(`${facilitatorUrl}/supported`)).rejects.toThrow();
+  });
 });
