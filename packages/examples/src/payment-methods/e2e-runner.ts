@@ -213,8 +213,11 @@ export async function runDeterministicPaymentLane(
       broadcastCalls: settleCalls,
     };
   } finally {
-    await example?.close();
-    facilitator.stop(true);
+    try {
+      await example?.close();
+    } finally {
+      facilitator.stop(true);
+    }
   }
 }
 
